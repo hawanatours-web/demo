@@ -56,6 +56,17 @@ export interface User {
   isActive: boolean;
 }
 
+export interface AlertSettings {
+  enableFinancialAlerts: boolean; 
+  financialAlertDays: number; 
+  enablePassportAlerts: boolean;  
+  passportAlertDays: number;  
+  enableFlightAlerts: boolean;    
+  flightAlertDays: number;    
+  enableHotelAlerts: boolean;     
+  hotelAlertDays: number;     
+}
+
 export interface CompanySettings {
   nameAr: string;
   nameEn: string;
@@ -66,6 +77,7 @@ export interface CompanySettings {
   website?: string;
   logoUrl?: string;
   logoVisibility: 'both' | 'system' | 'print';
+  alertSettings?: AlertSettings; 
 }
 
 export interface Treasury {
@@ -91,7 +103,7 @@ export interface Payment {
 export interface Agent {
   id: string;
   name: string;
-  type: 'Airline' | 'Hotel' | 'Visa' | 'General';
+  type: 'Airline' | 'Hotel' | 'Visa' | 'General' | 'Umrah' | 'Transport' | 'Insurance' | 'Tour' | string;
   phone?: string;
   balance: number; 
   currency?: Currency;
@@ -118,13 +130,13 @@ export interface Passenger {
   type: PaxType;
   title?: string; 
   birthDate?: string;
-  passportSubmitted?: boolean; // NEW: Track passport submission status
+  passportSubmitted?: boolean; 
 }
 
 // NEW: Inventory Item Interface
 export interface InventoryItem {
   id: string;
-  name: string; // e.g., "Concert Ticket A", "Hotel Room Standard"
+  name: string; 
   type: ServiceType;
   supplier: string;
   totalQuantity: number;
@@ -140,8 +152,8 @@ export interface InventoryItem {
   airline?: string;
   flightDate?: string;
   returnDate?: string;
-  departureTime?: string; // New: Flight Departure Time
-  arrivalTime?: string; // New: Flight Arrival Time
+  departureTime?: string; 
+  arrivalTime?: string; 
   route?: string;
   country?: string;
   visaType?: string;
@@ -170,13 +182,14 @@ export interface ServiceItem {
   sellingPrice: number; 
   tax?: number;
   supplier?: string; 
-  inventoryId?: string; // NEW: Link to Inventory
+  inventoryId?: string; 
   date?: string;
   country?: string;
   visaType?: string; 
   hotelName?: string;
+  hotelAddress?: string; // NEW: Hotel Address
   roomType?: string; 
-  roomCount?: number; // NEW: Track number of rooms specifically
+  roomCount?: number; 
   boardType?: string; 
   checkIn?: string;
   checkOut?: string;
@@ -188,14 +201,14 @@ export interface ServiceItem {
   route?: string; 
   flightDate?: string;
   returnDate?: string;
-  departureTime?: string; // New
-  arrivalTime?: string; // New
+  departureTime?: string; 
+  arrivalTime?: string; 
   vehicleType?: string; 
   driverName?: string;
   transportDate?: string;
   pickupLocation?: string;
   dropoffLocation?: string;
-  routes?: RouteSegment[]; // NEW: Support multiple routes
+  routes?: RouteSegment[]; 
   details?: string; 
 }
 
@@ -203,7 +216,7 @@ export interface Booking {
   id: string;
   fileNo?: string; 
   clientName: string; 
-  clientPhone?: string; // NEW
+  clientPhone?: string; 
   passengers: Passenger[]; 
   destination: string;
   date: string;
@@ -314,11 +327,11 @@ export interface StatCardProps {
 }
 
 export interface DataContextType {
-  bookings: Booking[]; // Paginated for Table
-  transactions: Transaction[]; // Paginated for Table
+  bookings: Booking[]; 
+  transactions: Transaction[]; 
   
-  allBookings: Booking[]; // Full dataset for calculations
-  allTransactions: Transaction[]; // Full dataset for calculations
+  allBookings: Booking[]; 
+  allTransactions: Transaction[]; 
 
   agents: Agent[];
   clients: Client[];
@@ -327,7 +340,6 @@ export interface DataContextType {
   currentUser: User | null; 
   isDbConnected: boolean; 
   
-  // Pagination State & Functions
   bookingsPage: number;
   bookingsTotal: number;
   fetchBookings: (page: number, search?: string, filters?: any) => void;
@@ -336,28 +348,23 @@ export interface DataContextType {
   transactionsTotal: number;
   fetchTransactions: (page: number, search?: string, filters?: any) => void;
 
-  // New Data Arrays
   itineraries: Itinerary[];
   tasks: Task[];
-  inventory: InventoryItem[]; // NEW
+  inventory: InventoryItem[]; 
   auditLogs: AuditLogEntry[];
 
-  // Company Settings
   companySettings: CompanySettings;
   updateCompanySettings: (settings: CompanySettings) => void;
 
-  // Theme & Language Management
   theme: Theme;
   toggleTheme: () => void;
   language: Language;
   toggleLanguage: (lang: Language) => void;
   t: (key: string) => string;
 
-  // Auth Methods
   login: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
   
-  // User Management
   addUser: (user: Omit<User, 'id'>) => void;
   updateUser: (id: string, data: Partial<User>) => void;
   deleteUser: (id: string) => void;
@@ -371,26 +378,22 @@ export interface DataContextType {
   addTransaction: (transaction: Omit<Transaction, 'id'>, updateTreasury?: boolean) => Promise<void>;
   updateTransaction: (id: string, data: Partial<Transaction>) => void;
   deleteTransaction: (id: string) => void;
-  transferTransaction: (transactionId: string, newTreasuryId: string) => void; // New Logic
+  transferTransaction: (transactionId: string, newTreasuryId: string) => void; 
   
-  // Agent Methods
   addAgent: (agent: Omit<Agent, 'id'>) => void;
   updateAgent: (id: string, data: Partial<Agent>) => void;
   deleteAgent: (id: string) => void;
   addAgentPayment: (agentId: string, amount: number, treasuryId: string) => void;
 
-  // Client Methods
   addClient: (client: Omit<Client, 'id'>) => void;
   updateClient: (id: string, data: Partial<Client>) => void;
   deleteClient: (id: string) => void;
   addClientPayment: (clientId: string, amount: number, treasuryId: string) => void;
 
-  // Treasury Methods
   addTreasury: (treasury: Omit<Treasury, 'id'>) => void;
   updateTreasury: (id: string, data: Partial<Treasury>) => void;
   deleteTreasury: (id: string) => void;
 
-  // NEW METHODS for Features
   addItinerary: (data: Omit<Itinerary, 'id' | 'createdAt' | 'createdBy'>) => void;
   deleteItinerary: (id: string) => void;
   
@@ -398,7 +401,6 @@ export interface DataContextType {
   updateTask: (id: string, data: Partial<Task>) => void;
   deleteTask: (id: string) => void;
 
-  // Inventory Methods
   addInventory: (data: Omit<InventoryItem, 'id'>) => void;
   updateInventory: (id: string, data: Partial<InventoryItem>) => void;
   deleteInventory: (id: string) => void;
@@ -406,7 +408,6 @@ export interface DataContextType {
 
   addAuditLog: (action: string, details: string, entityType: AuditLogEntry['entityType']) => void;
 
-  // Currency Management
   systemCurrency: Currency;
   exchangeRates: Record<string, number>; 
   setSystemCurrency: (currency: Currency) => void;
@@ -415,7 +416,6 @@ export interface DataContextType {
   getExchangeRate: () => number;
   convertCurrency: (amount: number, from: Currency, to: Currency) => number;
 
-  // Notifications & Alerts
   notification: Notification | null;
   showNotification: (message: string, type: 'success' | 'error' | 'info') => void;
   smartAlerts: SmartAlert[]; 
